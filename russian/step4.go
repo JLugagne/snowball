@@ -1,7 +1,7 @@
 package russian
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 4 is the undoubling of double non-vowel endings
@@ -13,7 +13,7 @@ func step4(word *snowballword.SnowballWord) bool {
 	// remove it.
 
 	// Undouble "н"
-	if word.HasSuffixRunes([]rune("нн")) {
+	if word.HasSuffixString("нн") {
 		word.RemoveLastNRunes(1)
 		return true
 	}
@@ -22,7 +22,7 @@ func step4(word *snowballword.SnowballWord) bool {
 	suffix := word.RemoveFirstSuffix("ейше", "ейш")
 	if suffix != "" {
 		// Undouble "н"
-		if word.HasSuffixRunes([]rune("нн")) {
+		if word.HasSuffixString("нн") {
 			word.RemoveLastNRunes(1)
 		}
 		return true

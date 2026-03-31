@@ -1,9 +1,7 @@
 package swedish
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1 is the stemming of various endings found in
@@ -22,7 +20,7 @@ func step1(w *snowballword.SnowballWord) bool {
 	// Using FirstSuffixIn since there are overlapping suffixes, where some might not be in the R1,
 	// while another might. For example: "ärade"
 	suffix := w.FirstSuffixIn(w.R1start, len(w.RS), suffixes...)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// If it is not in R1, do nothing
 	if suffix == "" || suffixLength > len(w.RS)-w.R1start {

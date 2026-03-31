@@ -1,7 +1,7 @@
 package french
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	"strings"
 )
 
@@ -18,11 +18,17 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 
 	w := snowballword.New(word)
+	stemWord(&w)
+	return w.String()
 
-	// Stem the word.  Note, each of these
-	// steps will alter `w` in place.
-	//
+}
 
+// StemWord stems w in place.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	var (
 		changeInStep1  bool
@@ -38,11 +44,6 @@ func Stem(word string, stemStopwWords bool) string {
 		}
 	}
 
-	// If the last step was successful, do step 3.  Note that,
-	// since we only do 2a if 1 is unsuccessful, the following
-	// "if" condition tests to see if the previous step was
-	// successful.
-	//
 	if changeInStep1 || changeInStep2a || changeInStep2b {
 		step3(w)
 	} else {
@@ -52,6 +53,4 @@ func Stem(word string, stemStopwWords bool) string {
 	step5(w)
 	step6(w)
 	postprocess(w)
-	return w.String()
-
 }

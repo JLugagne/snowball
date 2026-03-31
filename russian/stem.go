@@ -1,7 +1,7 @@
 package russian
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	"strings"
 )
 
@@ -18,11 +18,20 @@ func Stem(word string, stemStopwWords bool) string {
 		return word
 	}
 
+	stemWord(&w)
+	return w.String()
+
+}
+
+// StemWord stems w in place.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	step1(w)
 	step2(w)
 	step3(w)
 	step4(w)
-	return w.String()
-
 }

@@ -7,7 +7,7 @@ package norwegian
 import (
 	"testing"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Test stopWords for things we know should be true
@@ -55,7 +55,7 @@ func Test_r1(t *testing.T) {
 	}
 	for _, testCase := range wordTests {
 		w := snowballword.New(testCase.word)
-		r1start := r1(w)
+		r1start := r1(&w)
 		w.R1start = r1start
 		if w.R1String() != testCase.r1 {
 			t.Errorf("Expected \"{%v}\", but got \"{%v}\"", testCase.r1, w.R1String())
@@ -75,7 +75,7 @@ func runStepTest(t *testing.T, f stepFunc, tcs []stepTest) {
 	for _, testCase := range tcs {
 		w := snowballword.New(testCase.wordIn)
 		w.R1start = testCase.r1start
-		_ = f(w)
+		_ = f(&w)
 		if w.String() != testCase.wordOut || w.R1String() != testCase.r1out {
 			t.Errorf("Expected \"{%v, %v}\", but got \"{%v, %v}\"", testCase.wordOut, testCase.r1out, w.String(), w.R1String())
 		}

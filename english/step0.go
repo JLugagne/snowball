@@ -1,9 +1,7 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 0 is to strip off apostrophes and "s".
@@ -12,7 +10,7 @@ func step0(w *snowballword.SnowballWord) bool {
 	if suffix == "" {
 		return false
 	}
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 	w.RemoveLastNRunes(suffixLength)
 	return true
 }

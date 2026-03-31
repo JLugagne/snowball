@@ -1,9 +1,7 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1a is normalization of various special "s"-endings.
@@ -15,7 +13,7 @@ func step1a(w *snowballword.SnowballWord) bool {
 	case "sses":
 
 		// Replace by ss
-		w.ReplaceSuffixRunes([]rune(suffix), []rune("ss"), true)
+		w.ReplaceSuffixString(suffix, "ss", true)
 		return true
 
 	case "ies", "ied":
@@ -29,7 +27,7 @@ func step1a(w *snowballword.SnowballWord) bool {
 		} else {
 			repl = "ie"
 		}
-		w.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+		w.ReplaceSuffixString(suffix, repl, true)
 		return true
 
 	case "us", "ss":
@@ -42,7 +40,7 @@ func step1a(w *snowballword.SnowballWord) bool {
 		// not immediately before the s (so gas and this retain
 		// the s, gaps and kiwis lose it)
 		//
-		suffixLength := utf8.RuneCountInString(suffix)
+		suffixLength := snowballword.RuneLen(suffix)
 		for i := 0; i < len(w.RS)-2; i++ {
 			if isLowerVowel(w.RS[i]) {
 				w.RemoveLastNRunes(suffixLength)

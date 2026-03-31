@@ -3,7 +3,7 @@ package hungarian
 import (
 	"testing"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 func TestFindRegions(t *testing.T) {
@@ -13,7 +13,8 @@ func TestFindRegions(t *testing.T) {
 		"acsony":  3, //         vowel-digraph
 		"cvs":     3, //          null R1 region
 	} {
-		got := findRegions(snowballword.New(k))
+		w := snowballword.New(k)
+		got := findRegions(&w)
 		if got != want {
 			t.Errorf("%q: got %d, wanted %d", k, got, want)
 		}

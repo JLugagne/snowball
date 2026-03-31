@@ -1,7 +1,7 @@
 package english
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	"strings"
 )
 
@@ -18,16 +18,24 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 
 	// Return special words immediately
-	if specialVersion := stemSpecialWord(word); specialVersion != "" {
+	if specialVersion := StemSpecialWord(word); specialVersion != "" {
 		word = specialVersion
 		return word
 	}
 
 	w := snowballword.New(word)
+	stemWord(&w)
+	return w.String()
 
-	// Stem the word.  Note, each of these
-	// steps will alter `w` in place.
-	//
+}
+
+// StemWord stems w in place. The caller must have already lowercased
+// and loaded the word into w. Returns true if the word was modified.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	step0(w)
 	step1a(w)
@@ -38,7 +46,4 @@ func Stem(word string, stemStopwWords bool) string {
 	step4(w)
 	step5(w)
 	postprocess(w)
-
-	return w.String()
-
 }

@@ -1,9 +1,7 @@
 package french
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1 is the removal of standard suffixes
@@ -20,7 +18,7 @@ func step1(word *snowballword.SnowballWord) bool {
 	if suffix == "" {
 		return false
 	}
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	isInR1 := (word.R1start <= len(word.RS)-suffixLength)
 	isInR2 := (word.R2start <= len(word.RS)-suffixLength)
@@ -40,7 +38,7 @@ func step1(word *snowballword.SnowballWord) bool {
 			repl = "ent"
 		}
 		if repl != "" {
-			word.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+			word.ReplaceSuffixString(suffix, repl, true)
 			return true
 		}
 
@@ -69,7 +67,7 @@ func step1(word *snowballword.SnowballWord) bool {
 			repl = "ent"
 		}
 		if repl != "" {
-			word.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+			word.ReplaceSuffixString(suffix, repl, true)
 			return false
 		}
 
@@ -91,14 +89,14 @@ func step1(word *snowballword.SnowballWord) bool {
 	case "eaux":
 
 		// Replace with eau
-		word.ReplaceSuffixRunes([]rune(suffix), []rune("eau"), true)
+		word.ReplaceSuffixString(suffix, "eau", true)
 		return true
 
 	case "aux":
 
 		// Replace with al if in R1
 		if isInR1 {
-			word.ReplaceSuffixRunes([]rune(suffix), []rune("al"), true)
+			word.ReplaceSuffixString(suffix, "al", true)
 			return true
 		}
 
@@ -109,7 +107,7 @@ func step1(word *snowballword.SnowballWord) bool {
 			word.RemoveLastNRunes(suffixLength)
 			return true
 		} else if isInR1 {
-			word.ReplaceSuffixRunes([]rune(suffix), []rune("eux"), true)
+			word.ReplaceSuffixString(suffix, "eux", true)
 			return true
 		}
 
@@ -133,12 +131,12 @@ func step1(word *snowballword.SnowballWord) bool {
 
 			// If preceded by "ic", delete if in R2, else replace by "iqU".
 			newSuffix := word.FirstSuffix("ic")
-			newSuffixRunes := []rune(newSuffix)
 			if newSuffix != "" {
-				if word.FitsInR2(len(newSuffixRunes)) {
-					word.RemoveLastNRunes(len(newSuffixRunes))
+				newSuffixLen := snowballword.RuneLen(newSuffix)
+				if word.FitsInR2(newSuffixLen) {
+					word.RemoveLastNRunes(newSuffixLen)
 				} else {
-					word.ReplaceSuffixRunes(newSuffixRunes, []rune("iqU"), true)
+					word.ReplaceSuffixString(newSuffix, "iqU", true)
 				}
 			}
 			return true
@@ -154,7 +152,6 @@ func step1(word *snowballword.SnowballWord) bool {
 			// If preceded by "iv", delete if in R2
 			// (and if further preceded by "at", delete if in R2)
 			newSuffix := word.RemoveFirstSuffixIfIn(word.R2start, "iv")
-			newSuffixRunes := []rune(newSuffix)
 			if newSuffix != "" {
 				word.RemoveFirstSuffixIfIn(word.R2start, "at")
 				return true
@@ -162,13 +159,12 @@ func step1(word *snowballword.SnowballWord) bool {
 
 			// If preceded by "eus", delete if in R2, else replace by "eux" if in R1
 			newSuffix = word.FirstSuffix("eus")
-			newSuffixRunes = []rune(newSuffix)
 			if newSuffix != "" {
-				newSuffixLen := len(newSuffixRunes)
+				newSuffixLen := snowballword.RuneLen(newSuffix)
 				if word.FitsInR2(newSuffixLen) {
 					word.RemoveLastNRunes(newSuffixLen)
 				} else if word.FitsInR1(newSuffixLen) {
-					word.ReplaceSuffixRunes(newSuffixRunes, []rune("eux"), true)
+					word.ReplaceSuffixString(newSuffix, "eux", true)
 				}
 				return true
 			}
@@ -176,7 +172,7 @@ func step1(word *snowballword.SnowballWord) bool {
 			// If preceded by abl or iqU, delete if in R2, otherwise,
 			newSuffix = word.FirstSuffix("abl", "iqU")
 			if newSuffix != "" {
-				newSuffixLen := utf8.RuneCountInString(newSuffix)
+				newSuffixLen := snowballword.RuneLen(newSuffix)
 				if word.FitsInR2(newSuffixLen) {
 					word.RemoveLastNRunes(newSuffixLen)
 				}
@@ -185,10 +181,9 @@ func step1(word *snowballword.SnowballWord) bool {
 
 			// If preceded by ièr or Ièr, replace by i if in RV
 			newSuffix = word.FirstSuffix("ièr", "Ièr")
-			newSuffixRunes = []rune(newSuffix)
 			if newSuffix != "" {
-				if word.FitsInRV(len(newSuffixRunes)) {
-					word.ReplaceSuffixRunes(newSuffixRunes, []rune("i"), true)
+				if word.FitsInRV(snowballword.RuneLen(newSuffix)) {
+					word.ReplaceSuffixString(newSuffix, "i", true)
 				}
 				return true
 			}
@@ -206,11 +201,11 @@ func step1(word *snowballword.SnowballWord) bool {
 			// If preceded by "abil", delete if in R2, else replace by "abl"
 			newSuffix := word.FirstSuffix("abil")
 			if newSuffix != "" {
-				newSuffixLen := utf8.RuneCountInString(newSuffix)
+				newSuffixLen := snowballword.RuneLen(newSuffix)
 				if word.FitsInR2(newSuffixLen) {
 					word.RemoveLastNRunes(newSuffixLen)
 				} else {
-					word.ReplaceSuffixRunes([]rune(newSuffix), []rune("abl"), true)
+					word.ReplaceSuffixString(newSuffix, "abl", true)
 				}
 				return true
 			}
@@ -218,11 +213,11 @@ func step1(word *snowballword.SnowballWord) bool {
 			// If preceded by "ic", delete if in R2, else replace by "iqU"
 			newSuffix = word.FirstSuffix("ic")
 			if newSuffix != "" {
-				newSuffixLen := utf8.RuneCountInString(newSuffix)
+				newSuffixLen := snowballword.RuneLen(newSuffix)
 				if word.FitsInR2(newSuffixLen) {
 					word.RemoveLastNRunes(newSuffixLen)
 				} else {
-					word.ReplaceSuffixRunes([]rune(newSuffix), []rune("iqU"), true)
+					word.ReplaceSuffixString(newSuffix, "iqU", true)
 				}
 				return true
 			}
@@ -245,11 +240,11 @@ func step1(word *snowballword.SnowballWord) bool {
 				// And if further preceded by ic, delete if in R2, else replace by iqU
 				newSuffix = word.FirstSuffix("ic")
 				if newSuffix != "" {
-					newSuffixLen := utf8.RuneCountInString(newSuffix)
+					newSuffixLen := snowballword.RuneLen(newSuffix)
 					if word.FitsInR2(newSuffixLen) {
 						word.RemoveLastNRunes(newSuffixLen)
 					} else {
-						word.ReplaceSuffixRunes([]rune(newSuffix), []rune("iqU"), true)
+						word.ReplaceSuffixString(newSuffix, "iqU", true)
 					}
 				}
 			}

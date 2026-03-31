@@ -1,9 +1,7 @@
 package swedish
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 3:
@@ -20,7 +18,7 @@ func step3(w *snowballword.SnowballWord) bool {
 	suffix := w.FirstSuffixIn(w.R1start, len(w.RS),
 		"fullt", "löst", "lig", "els", "ig",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// If it is not in R1, do nothing
 	if suffix == "" || suffixLength > len(w.RS)-w.R1start {
@@ -39,7 +37,7 @@ func step3(w *snowballword.SnowballWord) bool {
 	case "lig", "ig", "els":
 		repl = ""
 	}
-	w.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+	w.ReplaceSuffixString(suffix, repl, true)
 	return true
 
 }

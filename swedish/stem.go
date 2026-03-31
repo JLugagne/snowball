@@ -3,7 +3,7 @@ package swedish
 import (
 	"strings"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Stem a Swedish word. This is the only exported
@@ -19,15 +19,19 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 
 	w := snowballword.New(word)
+	stemWord(&w)
+	return w.String()
 
-	// Stem the word.  Note, each of these
-	// steps will alter `w` in place.
-	//
+}
+
+// StemWord stems w in place.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	step1(w)
 	step2(w)
 	step3(w)
-
-	return w.String()
-
 }

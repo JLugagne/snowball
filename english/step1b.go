@@ -1,16 +1,14 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1b is the normalization of various "ly" and "ed" sufficies.
 func step1b(w *snowballword.SnowballWord) bool {
 
 	suffix := w.FirstSuffix("eedly", "ingly", "edly", "ing", "eed", "ed")
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	switch suffix {
 
@@ -22,7 +20,7 @@ func step1b(w *snowballword.SnowballWord) bool {
 
 		// Replace by ee if in R1
 		if suffixLength <= len(w.RS)-w.R1start {
-			w.ReplaceSuffixRunes([]rune(suffix), []rune("ee"), true)
+			w.ReplaceSuffixString(suffix, "ee", true)
 		}
 		return true
 
@@ -61,7 +59,7 @@ func step1b(w *snowballword.SnowballWord) bool {
 
 					// By definition, r1 and r2 are the empty string for
 					// short words.
-					w.RS = append(w.RS, []rune("e")...)
+					w.RS = append(w.RS, 'e')
 					w.R1start = len(w.RS)
 					w.R2start = len(w.RS)
 					return true
@@ -70,7 +68,7 @@ func step1b(w *snowballword.SnowballWord) bool {
 			case "at", "bl", "iz":
 
 				// If the word ends "at", "bl" or "iz" add "e"
-				w.ReplaceSuffixRunes([]rune(newSuffix), []rune(newSuffix+"e"), true)
+				w.ReplaceSuffixString(newSuffix, newSuffix+"e", true)
 
 			case "bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt":
 

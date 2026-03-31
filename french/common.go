@@ -1,10 +1,8 @@
 package french
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/romance"
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/romance"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Return `true` if the input `word` is a French stop word.
@@ -117,7 +115,7 @@ func findRegions(word *snowballword.SnowballWord) (r1start, r2start, rvstart int
 	//
 	prefix := word.FirstPrefix("par", "col", "tap")
 	if prefix != "" {
-		rvstart = utf8.RuneCountInString(prefix)
+		rvstart = snowballword.RuneLen(prefix)
 		return
 	}
 

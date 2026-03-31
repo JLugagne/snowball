@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 func TestStemSentence(t *testing.T) {
@@ -51,8 +51,8 @@ func TestStep1(t *testing.T) {
 		"padló":   "padló",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step1(w)
+		preprocess(&w)
+		step1(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -66,8 +66,8 @@ func TestStep2(t *testing.T) {
 		"palából":   "pala",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step2(w)
+		preprocess(&w)
+		step2(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -80,8 +80,8 @@ func TestStep3(t *testing.T) {
 		"lepkén":     "lepke",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step3(w)
+		preprocess(&w)
+		step3(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -96,8 +96,8 @@ func TestStep4(t *testing.T) {
 		"vízeséstül": "vízese",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step4(w)
+		preprocess(&w)
+		step4(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -109,8 +109,8 @@ func TestStep5(t *testing.T) {
 		"blatté": "blat",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step5(w)
+		preprocess(&w)
+		step5(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -122,8 +122,8 @@ func TestStep6(t *testing.T) {
 		"fiáéi":   "fia",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step6(w)
+		preprocess(&w)
+		step6(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -136,8 +136,8 @@ func TestStep7(t *testing.T) {
 		"bánatod": "bánat",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step7(w)
+		preprocess(&w)
+		step7(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -150,8 +150,8 @@ func TestStep8(t *testing.T) {
 		"bánatai":  "bánat",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step8(w)
+		preprocess(&w)
+		step8(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}
@@ -164,8 +164,8 @@ func TestStep9(t *testing.T) {
 		"bánatok": "bánat",
 	} {
 		w := snowballword.New(k)
-		preprocess(w)
-		step9(w)
+		preprocess(&w)
+		step9(&w)
 		if got := string(w.RS); got != want {
 			t.Errorf("%q: got %q, wanted %q", k, got, want)
 		}

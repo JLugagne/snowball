@@ -1,9 +1,7 @@
 package spanish
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 2b is the removal of verb suffixes beginning y,
@@ -25,7 +23,7 @@ func step2b(word *snowballword.SnowballWord) bool {
 		"ada", "aba", "ís", "ía", "ió", "ir", "id", "es", "er", "en",
 		"ed", "as", "ar", "an", "ad",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	switch suffix {
 	case "":

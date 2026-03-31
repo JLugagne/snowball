@@ -2,9 +2,8 @@ package spanish
 
 import (
 	"log"
-	"unicode/utf8"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1 is the removal of standard suffixes
@@ -21,7 +20,7 @@ func step1(word *snowballword.SnowballWord) bool {
 		"ante", "ador", "able", "oso", "osa", "ivo", "iva",
 		"ico", "ica",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	isInR1 := (word.R1start <= len(word.RS)-suffixLength)
 	isInR2 := (word.R2start <= len(word.RS)-suffixLength)
@@ -82,7 +81,7 @@ func step1(word *snowballword.SnowballWord) bool {
 	// Simple replacement & deletion cases are all that remain.
 	//
 	simpleReplacement := func(repl string) bool {
-		word.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+		word.ReplaceSuffixString(suffix, repl, true)
 		return true
 	}
 	switch suffix {
