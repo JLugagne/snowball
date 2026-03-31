@@ -3,7 +3,7 @@ package french
 import (
 	"log"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 4 is the cleaning up of residual suffixes.
@@ -60,8 +60,7 @@ func step4(word *snowballword.SnowballWord) bool {
 
 	case "ier", "ière", "Ier", "Ière":
 		// Replace with i
-		suffixRunes := []rune(suffix)
-		word.ReplaceSuffixRunes(suffixRunes, []rune("i"), true)
+		word.ReplaceSuffixString(suffix, "i", true)
 		return true
 
 	case "e":

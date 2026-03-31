@@ -1,9 +1,7 @@
 package french
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 2a is the removal of Verb suffixes beginning
@@ -22,7 +20,7 @@ func step2a(word *snowballword.SnowballWord) bool {
 	)
 
 	if suffix != "" {
-		suffixLength := utf8.RuneCountInString(suffix)
+		suffixLength := snowballword.RuneLen(suffix)
 		idx := len(word.RS) - suffixLength - 1
 		if idx >= 0 && word.FitsInRV(suffixLength+1) && isLowerVowel(word.RS[idx]) == false {
 			word.RemoveLastNRunes(suffixLength)

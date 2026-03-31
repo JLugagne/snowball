@@ -1,9 +1,7 @@
 package norwegian
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 1 is the stemming of various endings found in
@@ -19,7 +17,7 @@ func step1(w *snowballword.SnowballWord) bool {
 
 	// Using FirstSuffixIn since there are overlapping suffixes, where some might not be in the R1,
 	suffix := w.FirstSuffixIn(w.R1start, len(w.RS), suffixes...)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	if suffix == "s" {
 		// Delete if preceded by a valid s-ending. Valid s-endings inlude the
@@ -49,13 +47,13 @@ func step1(w *snowballword.SnowballWord) bool {
 
 	// replace "erte" and "ert" with "er"
 	suffix = w.FirstSuffix("erte", "ert")
-	suffixLength = utf8.RuneCountInString(suffix)
+	suffixLength = snowballword.RuneLen(suffix)
 
 	if suffix == "" || suffixLength > len(w.RS)-w.R1start {
 		return false
 	}
 
-	w.ReplaceSuffixRunes([]rune(suffix), []rune("er"), true)
+	w.ReplaceSuffixString(suffix, "er", true)
 
 	return true
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 func printDebug(debug bool, w *snowballword.SnowballWord) {
@@ -53,11 +53,17 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 
 	w := snowballword.New(word)
+	stemWord(&w)
+	return w.String()
 
-	// Stem the word.  Note, each of these
-	// steps will alter `w` in place.
-	//
+}
 
+// StemWord stems w in place.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	step1(w)
 	step2(w)
@@ -68,9 +74,6 @@ func Stem(word string, stemStopwWords bool) string {
 	step7(w)
 	step8(w)
 	step9(w)
-
-	return w.String()
-
 }
 
 func preprocess(w *snowballword.SnowballWord) {

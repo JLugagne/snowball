@@ -3,7 +3,7 @@ package hungarian
 import (
 	"sync"
 
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 var (

@@ -1,7 +1,7 @@
 package norwegian
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 3:
@@ -14,14 +14,12 @@ func step3(w *snowballword.SnowballWord) bool {
 		"hetslov", "eleg", "elig", "elov", "slov",
 		"leg", "eig", "lig", "els", "lov", "ig",
 	)
-	suffixRunes := []rune(suffix)
-
 	// If it is not in R1, do nothing
-	if suffix == "" || len(suffixRunes) > len(w.RS)-w.R1start {
+	if suffix == "" || snowballword.RuneLen(suffix) > len(w.RS)-w.R1start {
 		return false
 	}
 
-	w.ReplaceSuffixRunes(suffixRunes, []rune(""), true)
+	w.ReplaceSuffixString(suffix, "", true)
 	return true
 
 }

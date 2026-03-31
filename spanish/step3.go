@@ -1,9 +1,7 @@
 package spanish
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 3 is the removal of residual suffixes.
@@ -17,7 +15,7 @@ func step3(word *snowballword.SnowballWord) bool {
 	if suffix == "" {
 		return false
 	}
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// Remove all these suffixes
 	word.RemoveLastNRunes(suffixLength)

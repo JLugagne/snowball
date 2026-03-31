@@ -1,9 +1,7 @@
 package french
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 2b is the removal of Verb suffixes in RV
@@ -21,7 +19,7 @@ func step2b(word *snowballword.SnowballWord) bool {
 		"ez", "er", "as", "ai", "é", "a",
 	)
 
-	suffixLen := utf8.RuneCountInString(suffix)
+	suffixLen := snowballword.RuneLen(suffix)
 	switch suffix {
 	case "ions":
 

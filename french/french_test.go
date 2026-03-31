@@ -1,8 +1,8 @@
 package french
 
 import (
-	"github.com/kljensen/snowball/romance"
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/romance"
+	"github.com/JLugagne/snowball/snowballword"
 	"testing"
 )
 
@@ -45,7 +45,7 @@ func Test_capitalizeYUI(t *testing.T) {
 
 	for _, testCase := range testCases {
 		w := snowballword.New(testCase.wordIn)
-		capitalizeYUI(w)
+		capitalizeYUI(&w)
 		if w.String() != testCase.wordOut {
 			t.Errorf("Expect %v -> %v, but got %v", testCase.wordIn, testCase.wordOut, w.String())
 		}

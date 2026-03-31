@@ -1,9 +1,7 @@
 package russian
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	// "log"
 )
 
@@ -60,7 +58,7 @@ func removePerfectiveGerundEnding(word *snowballword.SnowballWord) bool {
 	suffix := word.FirstSuffixIn(word.RVstart, len(word.RS),
 		"ившись", "ывшись", "вшись", "ивши", "ывши", "вши", "ив", "ыв", "в",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 	switch suffix {
 	case "в", "вши", "вшись":
 
@@ -98,7 +96,7 @@ func removeAdjectivalEnding(word *snowballword.SnowballWord) bool {
 			"ивш", "ывш", "ующ",
 			"ем", "нн", "вш", "ющ", "щ",
 		)
-		suffixLength := utf8.RuneCountInString(newSuffix)
+		suffixLength := snowballword.RuneLen(newSuffix)
 
 		switch newSuffix {
 		case "ем", "нн", "вш", "ющ", "щ":
@@ -127,7 +125,7 @@ func removeVerbEnding(word *snowballword.SnowballWord) bool {
 		"ыл", "ую", "уй", "ть", "ны", "но", "на", "ло", "ли", "ла",
 		"ит", "им", "ил", "ет", "ен", "ем", "ей", "ю", "н", "л", "й",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	switch suffix {
 	case "ла", "на", "ете", "йте", "ли", "й", "л", "ем", "н",

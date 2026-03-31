@@ -1,9 +1,7 @@
 package spanish
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 0 is the removal of attached pronouns
@@ -19,7 +17,7 @@ func step0(word *snowballword.SnowballWord) bool {
 	if suffix1 == "" {
 		return false
 	}
-	s1Len := utf8.RuneCountInString(suffix1)
+	s1Len := snowballword.RuneLen(suffix1)
 
 	// We'll remove suffix1, if comes after one of the following
 	suffix2 := word.FirstSuffixIn(word.RVstart, len(word.RS)-len(suffix1),
@@ -51,7 +49,7 @@ func step0(word *snowballword.SnowballWord) bool {
 			suffix2repl = "ir"
 		}
 		word.RemoveLastNRunes(s1Len)
-		word.ReplaceSuffixRunes([]rune(suffix2), []rune(suffix2repl), true)
+		word.ReplaceSuffixString(suffix2, suffix2repl, true)
 		return true
 
 	case "ando", "iendo", "ar", "er", "ir":

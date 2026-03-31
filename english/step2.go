@@ -1,9 +1,7 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 2 is the stemming of various endings found in
@@ -17,7 +15,7 @@ func step2(w *snowballword.SnowballWord) bool {
 		"entli", "fulli", "iviti", "ousli", "anci", "abli",
 		"alli", "ator", "enci", "izer", "bli", "ogi", "li",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// If it is not in R1, do nothing
 	if suffix == "" || suffixLength > len(w.RS)-w.R1start {
@@ -54,7 +52,7 @@ func step2(w *snowballword.SnowballWord) bool {
 		//
 		rsLen := len(w.RS)
 		if rsLen >= 4 && w.RS[rsLen-4] == 108 {
-			w.ReplaceSuffixRunes([]rune(suffix), []rune("og"), true)
+			w.ReplaceSuffixString(suffix, "og", true)
 		}
 		return true
 	}
@@ -93,7 +91,7 @@ func step2(w *snowballword.SnowballWord) bool {
 	case "lessli":
 		repl = "less"
 	}
-	w.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+	w.ReplaceSuffixString(suffix, repl, true)
 	return true
 
 }

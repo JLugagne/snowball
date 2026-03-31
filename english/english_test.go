@@ -9,8 +9,8 @@ package english
 import (
 	"testing"
 
-	"github.com/kljensen/snowball/romance"
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/romance"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Test stopWords for things we know should be true
@@ -55,7 +55,7 @@ func Test_specialWords(t *testing.T) {
 		"outing",
 	}
 	for _, word := range knownTrueSpecialwords {
-		if stemmed := stemSpecialWord(word); stemmed == "" {
+		if stemmed := StemSpecialWord(word); stemmed == "" {
 			t.Errorf("Expected %v, to be in specialWords", word)
 		}
 	}
@@ -68,7 +68,7 @@ func Test_specialWords(t *testing.T) {
 		"bullschnizzle",
 	}
 	for _, word := range knownFalseSpecialwords {
-		if stemmed := stemSpecialWord(word); stemmed != "" {
+		if stemmed := StemSpecialWord(word); stemmed != "" {
 			t.Errorf("Expected %v, to NOT be in specialWords", word)
 		}
 	}
@@ -85,7 +85,7 @@ func Test_normalizeApostrophes(t *testing.T) {
 	}
 	for _, v := range variants {
 		w := snowballword.New(v)
-		normalizeApostrophes(w)
+		normalizeApostrophes(&w)
 		if w.String() != "'xxx'" {
 			t.Errorf("Expected \"'xxx'\", not \"%v\"", w.String())
 		}
@@ -101,7 +101,7 @@ func Test_capitalizeYs(t *testing.T) {
 	}
 	for _, wt := range wordTests {
 		w := snowballword.New(wt.in)
-		capitalizeYs(w)
+		capitalizeYs(&w)
 		if w.String() != wt.out {
 			t.Errorf("Expected \"%v\", not \"%v\"", wt.out, w.String())
 		}
@@ -119,7 +119,7 @@ func Test_preprocess(t *testing.T) {
 	}
 	for _, wt := range wordTests {
 		w := snowballword.New(wt.in)
-		preprocess(w)
+		preprocess(&w)
 		if w.String() != wt.out {
 			t.Errorf("Expected \"%v\", not \"%v\"", wt.out, w.String())
 		}
@@ -137,7 +137,7 @@ func Test_vnvSuffix(t *testing.T) {
 	}
 	for _, tc := range wordTests {
 		w := snowballword.New(tc.word)
-		pos := romance.VnvSuffix(w, isLowerVowel, tc.start)
+		pos := romance.VnvSuffix(&w, isLowerVowel, tc.start)
 		if pos != tc.pos {
 			t.Errorf("Expected %v, but got %v", tc.pos, pos)
 		}
@@ -165,7 +165,7 @@ func Test_r1r2(t *testing.T) {
 	}
 	for _, testCase := range wordTests {
 		w := snowballword.New(testCase.word)
-		r1start, r2start := r1r2(w)
+		r1start, r2start := r1r2(&w)
 		w.R1start = r1start
 		w.R2start = r2start
 		if w.R1String() != testCase.r1 || w.R2String() != testCase.r2 {
@@ -188,10 +188,10 @@ func Test_isShortWord(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		w := snowballword.New(testCase.word)
-		r1start, r2start := r1r2(w)
+		r1start, r2start := r1r2(&w)
 		w.R1start = r1start
 		w.R2start = r2start
-		isShort := isShortWord(w)
+		isShort := isShortWord(&w)
 		if isShort != testCase.isShort {
 			t.Errorf("Expected %v, but got %v for \"{%v, %v}\"", testCase.isShort, isShort, testCase.word, w.R1String())
 		}
@@ -215,7 +215,7 @@ func Test_endsShortSyllable(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		w := snowballword.New(testCase.word)
-		result := endsShortSyllable(w, testCase.pos)
+		result := endsShortSyllable(&w, testCase.pos)
 		if result != testCase.result {
 			t.Errorf("Expected endsShortSyllable(%v, %v) to return %v, not %v", testCase.word, testCase.pos, testCase.result, result)
 		}
@@ -238,7 +238,7 @@ func runStepTest(t *testing.T, f stepFunc, tcs []stepTest) {
 		w := snowballword.New(testCase.wordIn)
 		w.R1start = testCase.r1start
 		w.R2start = testCase.r2start
-		_ = f(w)
+		_ = f(&w)
 		if w.String() != testCase.wordOut || w.R1String() != testCase.r1out || w.R2String() != testCase.r2out {
 			t.Errorf("Expected \"{%v, %v, %v}\", but got \"{%v, %v, %v}\"", testCase.wordOut, testCase.r1out, testCase.r2out, w.String(), w.R1String(), w.R2String())
 		}

@@ -1,9 +1,7 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 4:
@@ -24,7 +22,7 @@ func step4(w *snowballword.SnowballWord) bool {
 		"ent", "ant", "ism", "ate", "iti", "ous", "ive",
 		"ize", "ion", "al", "er", "ic",
 	)
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// If it does not fit in R2, do nothing.
 	if suffixLength > len(w.RS)-w.R2start {

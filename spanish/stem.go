@@ -1,7 +1,7 @@
 package spanish
 
 import (
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	"log"
 	"strings"
 )
@@ -25,11 +25,17 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 
 	w := snowballword.New(word)
+	stemWord(&w)
+	return w.String()
 
-	// Stem the word.  Note, each of these
-	// steps will alter `w` in place.
-	//
+}
 
+// StemWord stems w in place.
+func StemWord(w *snowballword.SnowballWord) {
+	stemWord(w)
+}
+
+func stemWord(w *snowballword.SnowballWord) {
 	preprocess(w)
 	step0(w)
 	changeInStep1 := step1(w)
@@ -41,7 +47,4 @@ func Stem(word string, stemStopwWords bool) string {
 	}
 	step3(w)
 	postprocess(w)
-
-	return w.String()
-
 }

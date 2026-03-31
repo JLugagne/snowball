@@ -6,33 +6,112 @@ A [Go (golang)](http://golang.org) implementation of the
 [Snowball stemmer](http://snowball.tartarus.org/)
 for natural language processing.
 
+Fork of [kljensen/snowball](https://github.com/kljensen/snowball) with
+performance optimizations.
+
 
 |                      |  Status                   |
 | -------------------- | ------------------------- |
-| Latest release       |  [v0.10.0](https://github.com/kljensen/snowball/tags) (2024-08-13) |
-| Latest build status  |  [![Build](https://github.com/kljensen/snowball/workflows/Build/badge.svg?event=push)](https://github.com/kljensen/snowball/actions)
 | Languages available  |  English, Spanish (español), French (le français), Russian (ру́сский язы́к), Swedish (svenska), Norwegian (norsk), Hungarian (magyar)|
 | License              |  MIT                      |
 
 
+## What changed in this fork
+
+This fork adds a zero-allocation `Stemmer` API and several internal
+optimizations. Compared to the original `Stem()` function:
+
+| Metric | Original `Stem()` | `Stemmer.StemRunes()` | Change |
+|--------|------------------:|----------------------:|-------:|
+| English (26 words) | 23.25 µs | 11.01 µs | **-53%** |
+| French (15 words) | 12.80 µs | 6.26 µs | **-51%** |
+| Spanish (11 words) | 23.35 µs | 11.99 µs | **-49%** |
+| Bytes/op | 688–1,856 | **0** | **-100%** |
+| Allocs/op | 22–52 | **0** | **-100%** |
+
+Changes:
+
+* **`Stemmer` struct** -- reuses internal rune buffer across calls, eliminating
+  the per-word `[]rune` allocation from `snowballword.New`.
+* **`StemRunes`** -- returns the stemmed word as a `[]rune` slice (owned by the
+  Stemmer), avoiding the `string()` return allocation. Achieves 0 allocs/op.
+* **`Stemmer.Stem`** -- like the original but reuses buffers. 1 alloc/word (the
+  returned string).
+* **`WithoutToLower()` / `WithoutTrimSpace()`** -- options to skip normalization
+  when the caller provides pre-normalized input.
+* **`RuneLen` fast path** -- ASCII-optimized rune counting replaces
+  `utf8.RuneCountInString` in all hot paths.
+* **`SnowballWord.Reset`** -- reuses the backing `[]rune` array when capacity
+  allows.
+* **`StemWord` exported** from each language package for direct use with a
+  caller-managed `SnowballWord`.
+* Module renamed to `github.com/JLugagne/snowball`.
+* Go version bumped to 1.25.
+
+
 ## Usage
 
-
-Here is a minimal Go program that uses this package in order
-to stem a single word.
+### Drop-in replacement (same API as original)
 
 ```go
 package main
+
 import (
 	"fmt"
-	"github.com/kljensen/snowball"
+	"github.com/JLugagne/snowball"
 )
-func main(){
+
+func main() {
 	stemmed, err := snowball.Stem("Accumulations", "english", true)
-	if err == nil{
+	if err == nil {
 		fmt.Println(stemmed) // Prints "accumul"
 	}
 }
+```
+
+### Zero-allocation API
+
+Use `NewStemmer` with `StemRunes` to stem words in a tight loop with zero
+heap allocations:
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/JLugagne/snowball"
+)
+
+func main() {
+	// Create a reusable stemmer. Not safe for concurrent use.
+	s, err := snowball.NewStemmer("english",
+		snowball.WithoutToLower(),   // caller guarantees lowercase input
+		snowball.WithoutTrimSpace(), // caller guarantees trimmed input
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	words := []string{"accumulations", "agreement", "skating"}
+	for _, word := range words {
+		// StemRunes returns a []rune owned by the Stemmer.
+		// It is overwritten on the next call -- copy if needed.
+		runes, stemmed := s.StemRunes(word, true)
+		if stemmed {
+			fmt.Println(string(runes))
+		} else {
+			// Word was too short or is a stop word; use as-is.
+			fmt.Println(word)
+		}
+	}
+}
+```
+
+If you need a `string` result but still want buffer reuse:
+
+```go
+s, _ := snowball.NewStemmer("english")
+result := s.Stem("Accumulations", true) // 1 alloc (the returned string)
 ```
 
 
@@ -40,91 +119,35 @@ func main(){
 
 The code is organized as follows:
 
-* The top-level `snowball` package has a single exported function `snowball.Stem`,
-  which is defined in `snowball/snowball.go`.
-* The stemmer for each language is defined in a "sub-package", e.g `snowball/spanish`.
-* Each language exports a `Stem` function: e.g. `spanish.Stem`,
-  which is defined in `snowball/spanish/stem.go`.
-* Code that is common to multiple languages may go in a separate package,
-  e.g. the small `romance` package.
+* The top-level `snowball` package has `snowball.Stem` (original API) and
+  `snowball.NewStemmer` (zero-alloc API), defined in `snowball.go`.
+* The stemmer for each language is defined in a "sub-package", e.g `english`.
+* Each language exports `Stem` (allocating) and `StemWord` (in-place on a
+  `*SnowballWord`).
+* The `snowballword` package defines the `SnowballWord` struct with `New`,
+  `Reset`, and suffix/prefix matching methods.
+* Code common to multiple languages is in the `romance` package.
 
-Some notes about the implementation:
-
-* In order to ensure the code is easily extended to non-English languages,
-  I avoided using bytes and byte arrays, and instead perform all operations
-  on runes.  See `snowball/snowballword/snowballword.go` and the
-  `SnowballWord` struct.
-* In order to avoid casting strings into slices of runes numerous times,
-  this implementation uses a single slice of runes stored in the `SnowballWord`
-  struct for each word that needs to be stemmed.
-* In spite of the foregoing, readability requires that some strings be
-  kept around and repeatedly cast into slices of runes.  For example,
-  in the Spanish stemmer, one step requires removing suffixes with accute
-  accents such as "ución", "logía", and "logías".  If I were to hard-code those
-  suffices as slices of runes, the code would be substantially less readable.
-* Instead of carrying around the word regions R1, R2, & RV as separate strings
-  (or slices or runes, or whatever), we carry around the index where each of
-  these regions begins.  These are stored as `R1start`, `R2start`, & `RVstart`
-  on the `SnowballWord` struct. I believe this is a relatively efficient way of
-  storing R1 and R2.
-* The code does not use any maps or regular expressions 1) for kicks, and 2) because
-  I thought they'd negatively impact the performance. (But, mostly for #1; I realize
-  #2 is silly.)
-* I end up refactoring the `snowballword` package a bit every time I implement a
-  new language.
-* Clearly, the Go implentation of these stemmers is verbose relative to the
-  Snowball language.  However, it is much better than the
-  [Java version](https://github.com/weavejester/snowball-stemmer/blob/master/src/java/org/tartarus/snowball/ext/frenchStemmer.java)
-  and [others](https://github.com/patch/lingua-stem-unine-pm5/blob/master/src/frenchStemmerPlus.txt).
 
 ## Testing
 
 To run the tests, do `go test ./...` in the top-level directory.
 
-## Future work
-
-I'd like to implement the Snowball stemmer in more languages.
-If you can help, I would greatly appreciate it: please fork the project and send
-a pull request!
-
-(Also, if you are interested in creating a larger NLP project for Go, please get in touch.)
 
 ## Related work
 
-I know of a few other stemmers availble in Go:
+Other stemmers available in Go:
 
 * [stemmer](https://github.com/dchest/stemmer) by [Dmitry Chestnykh](https://github.com/dchest).
-  His project also
-  implements the Snowball (Porter2) English stemmer as well as the Snowball German stemmer.
-* [porter-stemmer](https://github.com/a2800276/porter-stemmer.go) - an implementation of the
-  original Porter stemming algorithm.
+* [porter-stemmer](https://github.com/a2800276/porter-stemmer.go) - the original Porter algorithm.
 * [go-stem](https://github.com/agonopol/go-stem) by [Alex Gonopolskiy](https://github.com/agonopol).
-  Also the original Porter algorithm.
 * [paicehusk](https://github.com/Rookii/paicehusk) by [Aaron Groves](https://github.com/rookii).
-  This package implements the
-  [Paice/Husk](http://www.comp.lancs.ac.uk/computing/research/stemming/)
-  stemmer.
-* [golibstemmer](https://github.com/rjohnsondev/golibstemmer)
-  by [Richard Johnson](https://github.com/rjohnsondev).  This provides Go bindings for the
-  [libstemmer](http://snowball.tartarus.org/download.php) C library.
-* [snowball](https://bitbucket.org/tebeka/snowball) by [Miki Tebeka](http://web.mikitebeka.com/).
-  Also, I believe, Go bindings for the C library.
-
-## Contributors
-
-* Kyle Jensen (kljensen@gmail.com, [@DataKyle](http://twitter.com/datakyle))
-* [Shawn Smith](https://github.com/shawnps)
-* [Herman Schaaf](https://github.com/hermanschaaf)
-* [Anton Södergren](https://github.com/AAAton)
-* [Eivind Moland](https://github.com/eivindam)
-* [ Tamás Gulácsi](https://github.com/tgulacsi)
-* [@clipperhouse](https://github.com/clipperhouse)
-* Your name should be here!
+* [golibstemmer](https://github.com/rjohnsondev/golibstemmer) - Go bindings for libstemmer.
 
 
 ## License (MIT)
 
-Copyright (c) the Contributors (see above)
+Copyright (c) the Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

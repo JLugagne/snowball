@@ -1,9 +1,7 @@
 package english
 
 import (
-	"unicode/utf8"
-
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Step 3 is the stemming of various longer sufficies
@@ -15,7 +13,7 @@ func step3(w *snowballword.SnowballWord) bool {
 		"iciti", "ical", "ful", "ness",
 	)
 
-	suffixLength := utf8.RuneCountInString(suffix)
+	suffixLength := snowballword.RuneLen(suffix)
 
 	// If it is not in R1, do nothing
 	if suffix == "" || suffixLength > len(w.RS)-w.R1start {
@@ -53,7 +51,7 @@ func step3(w *snowballword.SnowballWord) bool {
 	case "ful", "ness":
 		repl = ""
 	}
-	w.ReplaceSuffixRunes([]rune(suffix), []rune(repl), true)
+	w.ReplaceSuffixString(suffix, repl, true)
 	return true
 
 }

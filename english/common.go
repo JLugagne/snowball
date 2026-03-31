@@ -1,8 +1,8 @@
 package english
 
 import (
-	"github.com/kljensen/snowball/romance"
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/romance"
+	"github.com/JLugagne/snowball/snowballword"
 )
 
 // Replaces all different kinds of apostrophes with a single
@@ -108,7 +108,7 @@ func isLowerVowel(r rune) bool {
 
 // Returns the stemmed version of a word if it is a special
 // case, otherwise returns the empty string.
-func stemSpecialWord(word string) (stemmed string) {
+func StemSpecialWord(word string) (stemmed string) {
 	switch word {
 	case "skis":
 		stemmed = "ski"

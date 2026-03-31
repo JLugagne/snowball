@@ -6,7 +6,7 @@ package romance
 
 import (
 	"fmt"
-	"github.com/kljensen/snowball/snowballword"
+	"github.com/JLugagne/snowball/snowballword"
 	"testing"
 )
 
@@ -29,7 +29,7 @@ func RunStepTest(t *testing.T, f stepFunc, tcs []StepTestCase) {
 		w.R1start = testCase.R1start
 		w.R2start = testCase.R2start
 		w.RVstart = testCase.RVstart
-		retval := f(w)
+		retval := f(&w)
 		if retval != testCase.Changed || w.String() != testCase.WordOut || w.R1start != testCase.R1startOut || w.R2start != testCase.R2startOut || w.RVstart != testCase.RVstartOut {
 			t.Errorf("Expected %v -> \"{%v, %v, %v, %v, %v}\", but got \"{%v, %v, %v, %v, %v}\"", testCase.WordIn, testCase.WordOut, testCase.R1startOut, testCase.R2startOut, testCase.RVstartOut, testCase.Changed, w.String(), w.R1start, w.R2start, w.RVstart, retval)
 		}
@@ -84,7 +84,7 @@ type FindRegionsTestCase struct {
 func RunFindRegionsTest(t *testing.T, f func(*snowballword.SnowballWord) (int, int, int), tcs []FindRegionsTestCase) {
 	for _, testCase := range tcs {
 		w := snowballword.New(testCase.Word)
-		r1start, r2start, rvstart := f(w)
+		r1start, r2start, rvstart := f(&w)
 		if r1start != testCase.R1start || r2start != testCase.R2start || rvstart != testCase.RVstart {
 			t.Errorf("Expect \"%v\" -> %v, %v, %v, but got %v, %v, %v",
 				testCase.Word, testCase.R1start, testCase.R2start, testCase.RVstart,
